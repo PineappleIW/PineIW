@@ -1,0 +1,5 @@
+#Tomcat publish data
+#Mon Dec 28 11:13:29 CET 2015
+org.eclipse.jst.jee.server\:/binary\:/home/kei/.m2/repository/org/apache/tomcat/embed/tomcat-embed-websocket/8.0.24/tomcat-embed-websocket-8.0.24.jar=/home/kei/Escritorio/sts-bundle/pivotal-tc-server-developer-3.1.2.RELEASE/base-instance/wtpwebapps/pineapple/WEB-INF/lib/tomcat-embed-websocket-8.0.24.jar
+org.eclipse.jst.jee.server\:pineapple=/home/kei/Escritorio/sts-bundle/pivotal-tc-server-developer-3.1.2.RELEASE/base-instance/wtpwebapps/pineapple
+org.eclipse.jst.jee.server\:/binary\:/home/kei/.m2/repository/org/springframework/spring-web/4.1.8.RELEASE/spring-web-4.1.8.RELEASE.jar=/home/kei/Escritorio/sts-bundle/pivotal-tc-server-developer-3.1.2.RELEASE/base-instance/wtpwebapps/pineapple/WEB-INF/lib/spring-web-4.1.8.RELEASE.jar

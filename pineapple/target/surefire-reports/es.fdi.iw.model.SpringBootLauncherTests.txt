@@ -1,0 +1,12 @@
+-------------------------------------------------------------------------------
+Test set: es.fdi.iw.model.SpringBootLauncherTests
+-------------------------------------------------------------------------------
+Tests run: 3, Failures: 1, Errors: 0, Skipped: 0, Time elapsed: 2.938 sec <<< FAILURE! - in es.fdi.iw.model.SpringBootLauncherTests
+testGoodBook(es.fdi.iw.model.SpringBootLauncherTests)  Time elapsed: 0.039 sec  <<< FAILURE!
+java.lang.AssertionError: Status expected:<200> but was:<404>
+	at org.springframework.test.util.AssertionErrors.fail(AssertionErrors.java:60)
+	at org.springframework.test.util.AssertionErrors.assertEquals(AssertionErrors.java:89)
+	at org.springframework.test.web.servlet.result.StatusResultMatchers$10.match(StatusResultMatchers.java:653)
+	at org.springframework.test.web.servlet.MockMvc$1.andExpect(MockMvc.java:152)
+	at es.fdi.iw.model.SpringBootLauncherTests.testGoodBook(SpringBootLauncherTests.java:45)
+
