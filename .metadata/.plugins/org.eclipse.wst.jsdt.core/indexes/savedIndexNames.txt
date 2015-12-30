@@ -1,7 +1,0 @@
-INDEX VERSION 1.3+/home/kei/Documents/workspace-sts-3.7.2.RELEASE/.metadata/.plugins/org.eclipse.wst.jsdt.core/indexes
-2052186851.index
-662377251.index
-2389165682.index
-2366529441.index
-3331040990.index
-647598523.index
