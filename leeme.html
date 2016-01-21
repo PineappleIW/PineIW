@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf8"><title>Leeme</title></head>
+<body>
+<h1>Pineapples - entrega 1</h1>
+<p>Componentes del grupo "RV estudiantes"
+<ul>
+<li>Álvaro Martín Otero
+<li>Álvaro Mínguez Horcajada
+<li>Luis Paucar Cerrón
+<li>Rodrigo Bravo Antón
+</ul>
+<h2>Vistas que componen esta entrega</h2>
+<ul>
+<li><a href="http://localhost:8080/es/">home</a> - página de entrada; vista sin registro. Aparece un slider con la imagen y el título de los artículos de teoría más visitados recientemente, que al pinchar te redireccionará al contenido completo.
+Abajo aparecerán tres listas, por ejemplo:
+    <ul>
+        <li>Tags más usados y/o buscados
+        <li>Top de usuarios más valorados
+        <li>Ejercicios más vistos
+    </ul>
+
+<li><a href="http://localhost:8080/examenes">Exámenes</a> Página de búsqueda de exámenes. Arriba se podrá introducir un término de búsqueda relacionado con el examen deseado. Abajo se mostrarán los resultados de la búsqueda, pudiendo a la izquierda seleccionar los tag filtrando así los resultados.
+<li><a href="http://localhost:8080/examenes_sol">Solución de exámenes</a> Se mostrará el enunciado del examen deseado, habiendo abajo un campo para resolverlo, unicamente visible para usuarios que hayan realizado login previamente
+<li><a href="http://localhost:8080/usuario">Perfil usuario</a> - (sólo visible intentando registrarse a partir de la primera vista) Se mostrarán los datos personales, así como foto, nombre de usuario, examenes resueltos, puntuaciones...
+<li><a href="http://localhost:8080/solucion">Solucion</a> Vista creada para ver las diferentes soluciones de los conceptos de tipo examen
+<li><a href="http://localhost:8080/teoria">Teoria</a> Esta vista es la encargada de la busca entre nuestros conceptos. Cambiaremos el nombre a la vista y borraremos en el header la diferenciacion entre teoria y examenes
+<li><a href="http://localhost:8080/registro">Login</a> Aquí se introducirán datos varios sobre el usuario, pudiendo introducir una foto de perfil.
+Para completar el registro se debe aceptar los términos y condiciones de usuario.
+<li><a href="http://localhost:8080/admin">Admin</a>El administrador se encargara de revisar los archivos subidos que se le desplegaran en una lista.
+<li><a href="http://localhost:8080/teoria">Teoria</a>Similar a examenes. Un buscador de teoría.
+<li><a href="http://localhost:8080/ver_teoria">VerTeoria</a>Un visualizador de teoría, similar a examenes_sol pero con la diferencía de que se cambia el "box" para soluciones por un paginador. (actualmente esta puesto texto plano pero en el futuro sera un visor de archivos).
+<li><a href="http://localhost:8080/es/login">Login</a>pagina de login. A parte del login en el header, tenemos esta vista para redireccionar en caso de que el login sea necesario.
+<li><a href="http://localhost:8080/subida_elem">SubidaElem</a>pagina de subida de elementos
+</ul>
+
+
+
+<h2>Recursos externos utilizados</h2>
+<ul>
+<li><a href="http://getbootstrap.com/">bootstrap</a> (licencia <a href="https://github.com/twbs/bootstrap/blob/master/LICENSE">MIT</a>) - para el estilo general de la página
+<li><a href="https://jquery.com/">jquery</a> (licencia <a href="https://github.com/jquery/jquery/blob/master/LICENSE.txt">MIT</a>) - es una dependencia de bootstrap
+<li><a href="https://dribbble.com/shots/186084-Pineapple-Classic-Apple-Logo">logo
+</ul>
+
+<h2>Contraseñas de usuarios</h2>
+las contraseñas son hola1,hola2,hola3 y hola4 para cada uno de los usuarios en el orden en que se dan en la pagina principal (home)
+
+<h2>Todavia nos falta..</h2>
+Tenemos que incluir seguridad, que el admin pueda trastear con las soluciones, limpiar los jsp y quitarle scripts, styles... y ademas tratar ciertos errores como por ejemplo redireccionar al login si intenta responder a un examen sin estar registrado. Somos conscientes y trabajaremos en ello la semana que viene. Aparte de esto estamos abiertos a sugerencias.
+
+<h2>Nota: los archivos de tu proyecto de Github siguen incluidos dentro de la práctica puesto que las usamos para guiarnos mientras desarrollamos la página</h2>
+<h2>Nota2: Te incluimos una carpeta con las clases, si los incluimos no funciona la página</h2>
+
+Muchas gracias
+</body>
+</html>
