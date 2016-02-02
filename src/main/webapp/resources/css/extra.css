@@ -21,4 +21,9 @@ body {
   background-color: #f5f5f5;
 }
 
+.valoracion12{
+	/* VER_CONCEPTO PUNTUACION */
+	text-align: right;
+	width: 100%;							
+}
 

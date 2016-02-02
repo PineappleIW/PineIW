@@ -7,11 +7,18 @@ import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
+
 @NamedQueries({
     @NamedQuery(name="solucionByName",
         query="select u from Solucion u where u.nombre = :nombre"),
     @NamedQuery(name="solucionesByConcep",
     	query="select u from Solucion u where u.examen = :concep"),
+    @NamedQuery(name="soluciones",
+        query="select u from Solucion u"),
+    @NamedQuery(name="solucionesDenun",
+    	query="select u from Solucion u where u.denuncia = true"),	
 })
 
 @Entity
@@ -41,6 +48,10 @@ public class Solucion {
 		return nombre;
 	}
 
+	public void borradoTotal(){
+		user=null;
+		examen=null;
+	}
 
 
 	public void setNombre(String nombre) {
@@ -50,6 +61,7 @@ public class Solucion {
 
 
 	@ManyToOne(targetEntity=Concepto.class)
+	@OnDelete(action = OnDeleteAction.CASCADE)
 	public Concepto getExamen() {
 		return examen;
 	}
@@ -68,6 +80,7 @@ public class Solucion {
 	}
 	
 	@ManyToOne(targetEntity=Usuario.class)
+	@OnDelete(action = OnDeleteAction.CASCADE)
 	public Usuario getUser() {
 		return user;
 	}
@@ -96,6 +109,14 @@ public class Solucion {
 
 	public void setPuntuacion(int puntuacion) {
 		this.puntuacion = puntuacion;
+	}
+	
+	public void puntuacionmas(){
+		this.puntuacion++;
+	}
+	
+	public void puntuacionmenos(){
+		this.puntuacion--;
 	}
 	
 

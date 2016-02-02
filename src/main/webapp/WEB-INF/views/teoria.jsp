@@ -1,21 +1,5 @@
 <%@ include file="../fragments/header.jspf" %>
-<style>
-	.container{
-		width:100%;
-		float:left;
-	}
-	
-	.busquedasteoria{
-	    position: relative;
-    	width: 75%;
-    	float: left;
-    }
-	.list-group-item1{    
-        position: relative;
-	    display: block;
-        padding: 0px 13px;
-	}
-</style>
+
     <script>
         $(function() {
             $(".selecter_label_1").selecter({
@@ -52,32 +36,30 @@
                     <div class="left-sec">
                         <div class="left-cont">
                              <h6><span class="glyphicon glyphicon-search"></span> Refine Search</h6>
-			   <form class="filter-sec" id="facets">
-			   
-                                <input  id="filtrar1" type="text" name="textobusqueda" class="form-control"  type="text" />
-                <h5>Tipo de elemento:</h5>
-				  <div class="input-control">
-                                    <input name="tipo" onChange ="form.action=teoria?conce=as" class="checkbox2" id="red2" type="radio" value="examen" />
-                                    <label for="red2">Examen</label>
-                                    <input name="tipo" id="yellow2" type="radio" value="teoria" />
-                                    <label for="yellow2">Teoría</label>
-                                    <input name="tipo" class="checkbox2" id="blue2" type="radio" value="ambos" />
-                                    <label for="blue2">Ambos</label>
-                                </div>
-                           
-				<h5>Puntuación:</h5>
-				  <div class="input-control">
-                       <input name="color1[]" class="checkbox1" id="red1" type="radio" value="red1" />
-                       <label for="red1">4 ó más</label>
-                       <input name="color1[]" class="checkbox1" id="blue1" type="radio" value="blue1" />
-                       <label for="blue1">3 ó más</label>
-                       <input name="color1[]" class="checkbox1" id="green1" type="radio" value="green1" />
-                       <label for="green1">2 ó más</label>
-                       <input name="color1[]" class="checkbox1" id="yellow1" type="radio" value="yellow1" />
-                       <label for="yellow1">1 ó más</label>
-                   </div>                                
-                         <input type="submit" class="btn btn-default" value="Actualizar" name="actualizar">
-                            </form>
+			   <form class="filter-sec" method="GET" id="facets">
+				   
+	               <input  id="filtrar1" type="text" name="textobusqueda" class="form-control"  type="text" />
+	                <h5>Tipo de elemento:</h5>
+					<div class="input-control">
+	                	<input name="tipo" class="checkbox2" id="red2" type="radio" value="examen" />
+	                    <label for="red2">Examen</label>
+	                	<input name="tipo" id="yellow2" type="radio" value="teoria" />
+	                	<label for="yellow2">Teoría</label>
+	                    <input name="tipo" class="checkbox2" id="blue2" type="radio" value="ambos" checked/>
+	                    <label for="blue2">Ambos</label>
+	                </div>
+	                
+	                <h5>Ordenar por:</h5>
+					  <div class="input-control">
+					  	   <input name="valoracion" class="checkbox1" id="red22" type="radio" value="ninguna" checked/>
+	                       <label for="red22">Ninguna</label>
+	                       <input name="valoracion" class="checkbox1" id="red1" type="radio" value="desc"/>
+	                       <label for="red1">Mayor Valoración</label>
+	                       <input name="valoracion" class="checkbox1" id="blue1" type="radio" value="asc" />
+	                       <label for="blue1">Menos Valoraciones</label>
+	                   </div>                                
+	                         <input type="submit" class="btn btn-default" value="Actualizar" name="actualizar">
+                </form>
                         </div>
                     </div>
                 </div>
@@ -85,8 +67,8 @@
 								<h2>Contenido en la web</h2>
 									<c:forEach items="${t}" var="a">
 									<div class=list-group-item1>
-										<h3><a href="ver_concepto?conce=${a.nombre}">${a.descripcion}</a></h3>
-										<p>${a.nombre}</p>
+										<h3><a href="home?conce=${e:forHtml(a.nombre)}">${e:forHtml(a.descripcion)}</a></h3>
+										<p>${e:forHtml(a.nombre)}<span style="float: right;">Valoración: ${a.puntuacion}</span></p>
 									</div>
 								</c:forEach>
 								<br />

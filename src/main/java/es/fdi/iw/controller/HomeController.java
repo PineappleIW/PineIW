@@ -16,9 +16,11 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.transaction.Transactional;
 
+import org.hibernate.exception.GenericJDBCException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.TransactionSystemException;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -66,34 +68,50 @@ public class HomeController {
 		@Transactional
 		@RequestMapping(value = "/teoria", params={"actualizar"})
 	public ModelAndView teoria(@RequestParam ("tipo") String tipo,
-			@RequestParam ("textobusqueda") String texto
+			@RequestParam ("textobusqueda") String texto,
+			@RequestParam ("valoracion") String valoracion
 			) {
 			ModelAndView model = new ModelAndView("teoria");
 			List<Concepto> conceps;
 			if(tipo.equals("ambos") || tipo.equals("")){
-				conceps = (List<Concepto>)entityManager
+				if(valoracion.equals("ninguna")){
+					conceps = (List<Concepto>)entityManager
 						.createNamedQuery("concepts")
 						.getResultList();
-		    	List<String> conceptos= new ArrayList<String>();
-		    	for (Concepto con: conceps) {  
-		    		 conceptos.add(con.getNombre()+" - "+con.getUser().getLogin());
-		    	}
-				
+				}
+				if(valoracion.equals("asc") || valoracion.equals("") ){
+					conceps = (List<Concepto>)entityManager
+						.createNamedQuery("conceptsAsc")
+						.getResultList();
+				}else{
+					conceps = (List<Concepto>)entityManager
+							.createNamedQuery("conceptsDesc")
+							.getResultList();
+				}				
 			}
 	    	else{
-	    		conceps = (List<Concepto>)entityManager
-						.createNamedQuery("getTipo")
+	    		if(valoracion.equals("ninguna")){
+					conceps = (List<Concepto>)entityManager
+						.createNamedQuery("concepts")
+						.getResultList();
+				}
+	    		if(valoracion.equals("asc") || valoracion.equals("")){
+	    			conceps = (List<Concepto>)entityManager
+						.createNamedQuery("getTipoAsc")
 						.setParameter("tipo", tipo)
 						.getResultList();
-		    	List<String> conceptos= new ArrayList<String>();
-		    	for (Concepto con: conceps) {  
-		    		 conceptos.add(con.getNombre()+" - "+con.getUser().getLogin());
-		    	}
+	    		}else{
+	    			conceps = (List<Concepto>)entityManager
+							.createNamedQuery("getTipoDesc")
+							.setParameter("tipo", tipo)
+							.getResultList();
+	    		}
 	    	}
-	    	
-	  
+			List<String> conceptos= new ArrayList<String>();
+	    	for (Concepto con: conceps) {  
+	    		 conceptos.add(con.getNombre()+" - "+con.getUser().getLogin());
+	    	}
     	model.addObject("t",conceps);
-   
 		return model;
 	}
 	
@@ -146,6 +164,7 @@ public class HomeController {
        		    	t=tagpru;
        		    }
     		}
+    		model.addObject("h", "h");
     		if (!encon){
     			t=Tag.createTag(cadena[i]);
     			Tageo ta=Tageo.createTageo(c, t);
@@ -168,14 +187,34 @@ public class HomeController {
 	
 	@RequestMapping(value = "/usuario", method = RequestMethod.GET)
 	public ModelAndView usuario(HttpSession session) {
-		ModelAndView ret= new ModelAndView("usuario");
 		Usuario u = (Usuario)session.getAttribute("user");
+		ModelAndView ret;
+		if (u.isAdmin()){
+			ret=new ModelAndView("redirect:admin");
+		}
+		else{
+		ret= new ModelAndView("usuario");
 		ret.addObject("usuario",u);
 		List<Concepto> concepsuser = (List<Concepto>)entityManager
 				.createNamedQuery("conceptsByUser")
 				.setParameter("userParam", u)
 				.getResultList();
 		ret.addObject("lista",concepsuser);
+		
+		List<Integer> p=new ArrayList<Integer>();
+		List<Integer> l=new ArrayList<Integer>();
+		for(Concepto e:concepsuser){
+		List<Solucion> numsols=(List<Solucion>)entityManager
+				.createNamedQuery("solucionesByConcep")
+				.setParameter("concep", e)
+				.getResultList();
+				int i=numsols.size();
+				l.add(i);
+				p.add(e.getPuntuacion());
+		}
+		ret.addObject("votos",p);
+		ret.addObject("numsols",l);
+		}
 		return ret;
 		
 	}
@@ -235,6 +274,7 @@ public class HomeController {
 			
 		Usuario u = (Usuario)session.getAttribute("user");
 		ModelAndView ret=new ModelAndView("redirect:home");
+		if (u!=null){
 		Concepto con = (Concepto)entityManager
 				.createNamedQuery("conceptByName")
 				.setParameter("concepParam", nombre)
@@ -242,7 +282,10 @@ public class HomeController {
 		
 		Solucion sol=Solucion.CreateSolucion(con, u, contenido);
 		entityManager.persist(sol);
-		
+		}
+		else {
+			ret=new ModelAndView("redirect:login");
+		}
 		return ret;
 	}
 	
@@ -266,6 +309,50 @@ public class HomeController {
 		ret.addObject("solucion",solucion);
 		ret.addObject("sols",sols);
 		
+		return ret;
+	}
+	
+	@Transactional
+	@RequestMapping(value = "/home",params={"conceptovoto"},method = RequestMethod.GET)
+	public ModelAndView upconcepto(@RequestParam ("conceptovoto") String nombre,
+								   @RequestParam ("votos") String voto) {
+		ModelAndView ret=ver_concepto(nombre);
+		Concepto concep=(Concepto)entityManager
+				.createNamedQuery("conceptByName")
+				.setParameter("concepParam", nombre)
+				.getSingleResult();
+		if(voto.equalsIgnoreCase("true")){
+			concep.puntuacionmas();
+		}
+		else {
+			concep.puntuacionmenos();
+			if (concep.getPuntuacion()<-10){
+				concep.setDenuncia(true);	
+			} 
+		}
+		entityManager.persist(concep);
+		return ret;
+	}
+	
+	@Transactional
+	@RequestMapping(value = "/home",params={"solucionvoto"},method = RequestMethod.GET)
+	public ModelAndView upsolucion(@RequestParam ("solucionvoto") String nombre,
+								   @RequestParam ("votos") String voto) {
+		ModelAndView ret=ver_concepto3(nombre);
+		Solucion sol=(Solucion)entityManager
+				.createNamedQuery("solucionByName")
+				.setParameter("nombre", nombre)
+				.getSingleResult();
+		if(voto.equalsIgnoreCase("true")){
+			sol.puntuacionmas();
+		}
+		else {
+			sol.puntuacionmenos();
+			if (sol.getPuntuacion()<-10){
+				sol.setDenuncia(true);	
+			}
+		}
+		entityManager.persist(sol);
 		return ret;
 	}
 	
@@ -298,29 +385,37 @@ public class HomeController {
 
 
 	// metodo inicial de admin, sera el encargado de buscar todos los articulos de teoria y examenes y sacarlos por pantalla
-	@RequestMapping(value ="/admin",method = RequestMethod.GET)
-	public ModelAndView administrador() {
-	
+		@RequestMapping(value ="/admin",method = RequestMethod.GET)
+		public ModelAndView administrador() {
 		
-    	ModelAndView model = new ModelAndView("admin");
-    	List<Usuario> usuarios = (List<Usuario>)entityManager
-				.createNamedQuery("users")
-				.getResultList();
-    	model.addObject("u",usuarios);
-    	
-    	
-    	List<Concepto> concepsden = (List<Concepto>)entityManager
-				.createNamedQuery("conceptsDenun")
-				.getResultList();
-    	 model.addObject("o",concepsden);
-    	
-    	List<Concepto> conceps = (List<Concepto>)entityManager
-				.createNamedQuery("concepts")
-				.getResultList();
-    	 model.addObject("i",conceps);
-    	return model;
-	}
-	
+			
+	    	ModelAndView model = new ModelAndView("admin");
+	    	List<Usuario> usuarios = (List<Usuario>)entityManager
+					.createNamedQuery("users")
+					.getResultList();
+	    	model.addObject("u",usuarios);
+	    	
+	    	List<Solucion> solucionden = (List<Solucion>)entityManager
+					.createNamedQuery("solucionesDenun")
+					.getResultList();
+	    	 model.addObject("sd",solucionden);
+	    	
+	    	List<Solucion> solucion = (List<Solucion>)entityManager
+					.createNamedQuery("soluciones")
+					.getResultList();
+	    	 model.addObject("s",solucion);
+	    	
+	    	List<Concepto> concepsden = (List<Concepto>)entityManager
+					.createNamedQuery("conceptsDenun")
+					.getResultList();
+	    	 model.addObject("o",concepsden);
+	    	
+	    	List<Concepto> conceps = (List<Concepto>)entityManager
+					.createNamedQuery("concepts")
+					.getResultList();
+	    	 model.addObject("i",conceps);
+	    	return model;
+		}
 
 	@Transactional
 	@RequestMapping(value="/admin", params={"borrado"})
@@ -335,6 +430,46 @@ public class HomeController {
 		return model2;
 	}
 	
+	@Transactional
+	@RequestMapping(value="/admin", params={"borradosol"})
+	public ModelAndView borrarsol(@RequestParam ("borradosol") String solu){
+		ModelAndView model2 = new ModelAndView("redirect:admin");
+		Solucion sol = (Solucion)entityManager
+				.createNamedQuery("solucionByName")
+				.setParameter("nombre", solu)
+				.getSingleResult();
+		sol.borradoTotal();
+		entityManager.remove(sol);
+		return model2;
+	}
+	
+	@Transactional
+	@RequestMapping(value="/admin", params={"dessol"})
+	public ModelAndView dessol(@RequestParam ("dessol") String solu){
+		ModelAndView model2 = new ModelAndView("redirect:admin");
+		Solucion sol = (Solucion)entityManager
+				.createNamedQuery("solucionByName")
+				.setParameter("nombre", solu)
+				.getSingleResult();
+		sol.setDenuncia(false);
+		sol.setPuntuacion(0);
+		entityManager.persist(sol);
+		return model2;
+	}
+	
+	@Transactional
+	@RequestMapping(value="/admin", params={"desconcep"})
+	public ModelAndView desconcep(@RequestParam ("desconcep") String concep){
+		ModelAndView model2 = new ModelAndView("redirect:admin");
+		Concepto concepto = (Concepto)entityManager
+				.createNamedQuery("conceptByName")
+				.setParameter("concepParam", concep)
+				.getSingleResult();
+		concepto.desDen();
+		concepto.setPuntuacion(0);
+		entityManager.persist(concepto);
+		return model2;
+	}
 
 	@RequestMapping(value="/admin", params={"editaconcep"})
 	public ModelAndView editado(@RequestParam ("editaconcep") String concep){
@@ -347,6 +482,16 @@ public class HomeController {
 		return model2;
 	}
 	
+	@RequestMapping(value="/admin", params={"editasol"})
+	public ModelAndView editasol(@RequestParam ("editasol") String solucion){
+		ModelAndView model2 = new ModelAndView("editsolucion");
+		Solucion sol=(Solucion)entityManager
+				.createNamedQuery("solucionByName")
+				.setParameter("nombre", solucion)
+				.getSingleResult();
+		model2.addObject("s",sol);
+		return model2;
+	}
 	
 	
 	@Transactional
@@ -370,14 +515,31 @@ public class HomeController {
 		return model2;
 	}
 	
+	
+	@Transactional
+	@RequestMapping(value="/admin", params={"enviadosol"})
+	public ModelAndView editadosolucion (@RequestParam ("comment") String descrip,
+			@RequestParam ("enviadosol") String envi){
+		
+		ModelAndView model2 = new ModelAndView("redirect:admin");
+		Solucion sol = (Solucion)entityManager
+				.createNamedQuery("solucionByName")
+				.setParameter("nombre", envi)
+				.getSingleResult();
+		sol.setContenido(descrip);
+		entityManager.persist(sol);
+		return model2;
+	}
+	
 	@Transactional
 	@RequestMapping(value="/admin", params={"enviado"})
 	public ModelAndView editadoconcepto (@RequestParam ("nombre") String nombre,
-			@RequestParam ("comment") String descrip){
+			@RequestParam ("comment") String descrip,
+			@RequestParam ("enviado") String envi){
 		ModelAndView model2 = new ModelAndView("redirect:admin");
 		Concepto concepto = (Concepto)entityManager
 				.createNamedQuery("conceptByName")
-				.setParameter("concepParam", nombre)
+				.setParameter("concepParam", envi)
 				.getSingleResult();
 		concepto.setDescripcion(descrip);
 		concepto.setNombre(nombre);
@@ -398,12 +560,11 @@ public class HomeController {
     public ModelAndView registrar(@RequestParam ("nombre") String nom,@RequestParam ("apellido") String apell,
     		@RequestParam ("email") String emai,@RequestParam ("contra") String con,
     		@RequestParam ("contra2") String con2, @RequestParam ("user") String us){
-    	
-		
-    	if(nom.equalsIgnoreCase("admin")){
-    		return new ModelAndView("redirect:admin");
+    	try{
+		Usuario u = (Usuario)entityManager.createNamedQuery("userByLogin")
+				.setParameter("loginParam", us).getSingleResult();
     	}
-    	else {
+    	catch (Exception e){
     	boolean correcto=true;
     	ModelAndView model = new ModelAndView("registro");
        	if(us.equalsIgnoreCase("")){
@@ -449,20 +610,16 @@ public class HomeController {
     	if(correcto){
     		Usuario user = Usuario.createUser(nom,con,false,us,apell,emai);
     		entityManager.persist(user);
-    		Concepto concep = Concepto.createConcept(user,"concepto1","concepto1 de tipo prueba","teoría");
-    		Tag ta = Tag.createTag("SO");
-    		Tageo tageo= Tageo.createTageo(concep, ta);
-    		ta.addTageo(tageo);
-    		concep.addTageo(tageo);
-    		Solucion so= Solucion.CreateSolucion(concep, user, "hola que tal");
-    		entityManager.persist(so);
-   		 	entityManager.persist(concep);
-   		 	entityManager.persist(ta);
-   		 	entityManager.persist(tageo);
+   		 	model= new ModelAndView("redirect:home");
     	}
-        }
+    	}
     	return model;
     	}
+    	ModelAndView model = new ModelAndView("registro");
+    	model.addObject("fallo","fallo");
+    	return model;
+    	
+
     	
     }
 	
@@ -552,10 +709,7 @@ public class HomeController {
 		logger.info("Login attempt from '{}' while visiting '{}'", formLogin);
 		
 		// validate request
-		if (formLogin == null || formLogin.length() < 4 || formPass == null || formPass.length() < 4) {
-			ret.addObject("loginError", "usuarios y contraseñas: 4 caracteres mínimo");
-
-		} else {
+		if (!(formLogin == null || formPass == null)) {
 			Usuario u = null;
 			try {
 				u = (Usuario)entityManager.createNamedQuery("userByLogin")
@@ -594,301 +748,3 @@ public class HomeController {
 	    return token;
 	}
 }
-
-/*
-	@PersistenceContext
-	private EntityManager entityManager;
-	
-	
-	@RequestMapping(value = "/login", method = RequestMethod.POST)
-	@Transactional
-	public String login(
-			@RequestParam("login") String formLogin,
-			@RequestParam("pass") String formPass,
-			@RequestParam("source") String formSource,
-			HttpServletRequest request, HttpServletResponse response, 
-			Model model, HttpSession session) {
-		
-		logger.info("Login attempt from '{}' while visiting '{}'", formLogin, formSource);
-		
-		// validate request
-		if (formLogin == null || formLogin.length() < 4 || formPass == null || formPass.length() < 4) {
-			model.addAttribute("loginError", "usuarios y contraseñas: 4 caracteres mínimo");
-			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-		} else {
-			User u = null;
-			try {
-				u = (User)entityManager.createNamedQuery("userByLogin")
-					.setParameter("loginParam", formLogin).getSingleResult();
-				if (u.isPassValid(formPass)) {
-					logger.info("pass was valid");				
-					session.setAttribute("user", u);
-					// sets the anti-csrf token
-					getTokenForSession(session);
-				} else {
-					logger.info("pass was NOT valid");
-					model.addAttribute("loginError", "error en usuario o contraseña");
-					response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-				}
-			} catch (NoResultException nre) {
-				if (formPass.length() == 4) {
-					// UGLY: register new users if they do not exist and pass is 4 chars long
-					logger.info("no-such-user; creating user {}", formLogin);				
-					User user = User.createUser(formLogin, formPass, "user");
-					entityManager.persist(user);				
-					session.setAttribute("user", user);
-					// sets the anti-csrf token
-					getTokenForSession(session);					
-				} else {
-					logger.info("no such login: {}", formLogin);
-				}
-				model.addAttribute("loginError", "error en usuario o contraseña");
-			}
-		}
-		
-		// redirects to view from which login was requested
-		return "redirect:" + formSource;
-	}
-	
-	
-	@RequestMapping(value = "/delUser", method = RequestMethod.POST)
-	@ResponseBody
-	@Transactional // needed to allow DB change
-	public ResponseEntity<String> bookAuthors(@RequestParam("id") long id,
-			@RequestParam("csrf") String token, HttpSession session) {
-		if ( ! isAdmin(session) || ! isTokenValid(session, token)) {
-			return new ResponseEntity<String>("Error: no such user or bad auth", 
-					HttpStatus.FORBIDDEN);
-		} else if (entityManager.createNamedQuery("delUser")
-				.setParameter("idParam", id).executeUpdate() == 1) {
-			return new ResponseEntity<String>("Ok: user " + id + " removed", 
-					HttpStatus.OK);
-		} else {
-			return new ResponseEntity<String>("Error: no such user", 
-					HttpStatus.BAD_REQUEST);
-		}
-	}			
-	
-	
-	@RequestMapping(value = "/logout", method = RequestMethod.GET)
-	public String logout(HttpSession session) {
-		logger.info("User '{}' logged out", session.getAttribute("user"));
-		session.invalidate();
-		return "redirect:home";
-	}
-
-	
-	@RequestMapping(value="/user", method=RequestMethod.POST)
-    public @ResponseBody String handleFileUpload(@RequestParam("photo") MultipartFile photo,
-    		@RequestParam("id") String id){
-        if (!photo.isEmpty()) {
-            try {
-                byte[] bytes = photo.getBytes();
-                BufferedOutputStream stream =
-                        new BufferedOutputStream(
-                        		new FileOutputStream(ContextInitializer.getFile("user", id)));
-                stream.write(bytes);
-                stream.close();
-                return "You successfully uploaded " + id + 
-                		" into " + ContextInitializer.getFile("user", id).getAbsolutePath() + "!";
-            } catch (Exception e) {
-                return "You failed to upload " + id + " => " + e.getMessage();
-            }
-        } else {
-            return "You failed to upload a photo for " + id + " because the file was empty.";
-        }
-    }
-
-	
-	@RequestMapping(value = "/user", method = RequestMethod.GET)
-	public String user(HttpSession session, HttpServletRequest request) {		
-		return "user";
-	}	
-
-	
-	@RequestMapping(value = "/book/{id}", method = RequestMethod.GET)
-	public String book(@PathVariable("id") long id, HttpServletResponse response, Model model) {
-		Book b = entityManager.find(Book.class, id);
-		if (b == null) {
-			response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-			logger.error("No such book: {}", id);
-		} else {
-			model.addAttribute("book", b);
-		}
-		model.addAttribute("prefix", "../");
-		return "book";
-	}	
-	
-	
-	@RequestMapping(value = "/book/{id}", method = RequestMethod.DELETE)
-	@Transactional
-	@ResponseBody
-	public String rmbook(@PathVariable("id") long id, HttpServletResponse response, Model model) {
-		try {
-			Book b = entityManager.find(Book.class, id);
-			for (Author a : b.getAuthors()) {
-				a.getWritings().remove(b);
-				entityManager.persist(a);
-			}
-			entityManager.remove(b);
-			response.setStatus(HttpServletResponse.SC_OK);
-			return "OK";
-		} catch (NoResultException nre) {
-			logger.error("No such book: {}", id, nre);
-			response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-			return "ERR";
-		}
-	}		
-	
-	@RequestMapping(value = "/books", method = RequestMethod.GET)
-	@Transactional
-	public String books(Model model) {
-		model.addAttribute("books", entityManager.createNamedQuery("allBooks").getResultList());
-		model.addAttribute("owners", entityManager.createNamedQuery("allUsers").getResultList());
-		model.addAttribute("authors", entityManager.createNamedQuery("allAuthors").getResultList());
-		return "books";
-	}	
-	
-
-	@RequestMapping(value = "/book", method = RequestMethod.POST)
-	@Transactional
-	public String book(@RequestParam("owner") long ownerId,
-			@RequestParam("authors") long[] authorIds,
-			@RequestParam("title") String title,
-			@RequestParam("description") String description, Model model) {
-		Book b = new Book();
-		b.setTitle(title);
-		b.setDescription(description);
-		for (long aid : authorIds) {
-			// adding authors to book is useless, since author is the owning side (= has no mappedBy)
-			Author a = entityManager.find(Author.class, aid);
-			a.getWritings().add(b);
-			entityManager.persist(a);
-		}
-		b.setOwner(entityManager.getReference(User.class, ownerId));
-		entityManager.persist(b);
-		entityManager.flush();
-		logger.info("Book " + b.getId() + " written ok - owned by " + b.getOwner().getLogin() 
-				+ " written by " + b.getAuthors());
-		
-		return "redirect:book/" + b.getId();
-	}	
-	
-	@RequestMapping(value = "/bookAuthors")
-	@ResponseBody
-	@Transactional // needed to allow lazy init to work
-	public ResponseEntity<String> bookAuthors(@RequestParam("id") long id, HttpServletRequest request) {
-		try {
-			Book book = (Book)entityManager.find(Book.class, id);
-			List<Author> authors = book.getAuthors();
-			StringBuilder sb = new StringBuilder("[");
-			for (Author a : authors) {
-				if (sb.length()>1) sb.append(",");
-				sb.append("{ "
-						+ "\"id\": \"" + a.getId() + "\", "
-						+ "\"familyName\": \"" + a.getFamilyName() + "\", "
-						+ "\"lastName\": \"" + a.getLastName() + "\"}");
-			}
-			return new ResponseEntity<String>(sb + "]", HttpStatus.OK);
-		} catch (NoResultException nre) {
-			logger.error("No such book: {}", id, nre);
-		}
-		return new ResponseEntity<String>("Error: libro no existe", HttpStatus.BAD_REQUEST);		
-	}			
-	
-	
-	@RequestMapping(value = "/author/{id}", method = RequestMethod.GET)
-	public String author(@PathVariable("id") long id, Model model) {		
-		try {
-			model.addAttribute("author", entityManager.find(Author.class, id));
-		} catch (NoResultException nre) {
-			logger.error("No such author: {}", id, nre);
-		}
-		model.addAttribute("prefix", "../");
-		return "author";
-	}	
-	
-	
-	@ResponseBody
-	@RequestMapping(value="/user/photo", method = RequestMethod.GET, produces = MediaType.IMAGE_JPEG_VALUE)
-	public byte[] userPhoto(@RequestParam("id") String id) throws IOException {
-	    File f = ContextInitializer.getFile("user", id);
-	    InputStream in = null;
-	    if (f.exists()) {
-	    	in = new BufferedInputStream(new FileInputStream(f));
-	    } else {
-	    	in = new BufferedInputStream(
-	    			this.getClass().getClassLoader().getResourceAsStream("unknown-user.jpg"));
-	    }
-	    
-	    return IOUtils.toByteArray(in);
-	}
-	
-	
-	@RequestMapping(value = "/debug", method = RequestMethod.GET)
-	public String debug(HttpSession session, HttpServletRequest request) {
-		String formDebug = request.getParameter("debug");
-		logger.info("Setting debug to {}", formDebug);
-		session.setAttribute("debug", 
-				"true".equals(formDebug) ? "true" : "false");
-		return "redirect:/";
-	}
-
-	
-	@RequestMapping(value = "/", method = RequestMethod.GET)
-	public String empty(Locale locale, Model model) {
-		logger.info("Welcome home! The client locale is {}.", locale);
-		
-		Date date = new Date();
-		DateFormat dateFormat = DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.LONG, locale);
-		
-		String formattedDate = dateFormat.format(date);
-		
-		model.addAttribute("serverTime", formattedDate);
-		model.addAttribute("pageTitle", "Bienvenido a IW");
-		
-		return "home";
-	}	
-
-	
-	@RequestMapping(value = "/home", method = RequestMethod.GET)
-	public String index(Locale locale, Model model) {
-		return empty(locale, model);
-	}	
-
-	
-	@RequestMapping(value = "/about", method = RequestMethod.GET)
-	@Transactional
-	public String about(Locale locale, Model model) {
-		logger.info("User is looking up 'about us'");
-		@SuppressWarnings("unchecked")
-		List<User> us = (List<User>)entityManager.createQuery("select u from User u").getResultList();
-		System.err.println(us.size());
-		model.addAttribute("users", us);
-		model.addAttribute("pageTitle", "IW: Quienes somos");
-		return "about";
-	}	
-	
-	
-	static boolean isTokenValid(HttpSession session, String token) {
-	    Object t=session.getAttribute("csrf_token");
-	    return (t != null) && t.equals(token);
-	}
-	
-	
-	static String getTokenForSession (HttpSession session) {
-	    String token=UUID.randomUUID().toString();
-	    session.setAttribute("csrf_token", token);
-	    return token;
-	}
-	
-	
-	static boolean isAdmin(HttpSession session) {
-		User u = (User)session.getAttribute("user");
-		if (u != null) {
-			return u.getRole().equals("admin");
-		} else {
-			return false;
-		}
-	}
-}*/

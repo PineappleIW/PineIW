@@ -21,14 +21,21 @@ import org.hibernate.annotations.OnDeleteAction;
 @NamedQueries({
     @NamedQuery(name="concepts",
         query="select u from Concepto u"),
+    @NamedQuery(name="conceptsAsc",
+    	query="select u from Concepto u order by u.puntuacion asc"),
+    @NamedQuery(name="conceptsDesc",
+		query="select u from Concepto u order by u.puntuacion desc"),
     @NamedQuery(name="conceptsByUser",
     	query="select u from Concepto u where u.user = :userParam"),
     @NamedQuery(name="conceptByName",
     	query="select u from Concepto u where u.nombre = :concepParam"),
     @NamedQuery(name="conceptsDenun",
     	query="select u from Concepto u where u.denuncia = true"),
-    @NamedQuery(name="getTipo",
-   		query="select u from Concepto u where u.tipo = :tipo"),
+    @NamedQuery(name="getTipoDesc",
+   		query="select u from Concepto u where u.tipo = :tipo order by u.puntuacion Desc"),
+    @NamedQuery(name="getTipoAsc",
+		query="select u from Concepto u where u.tipo = :tipo order by u.puntuacion Asc"),
+	
 })
 
 
@@ -76,8 +83,13 @@ public class Concepto {
 	public void borrauser (){
 		this.user=null;
 	}
+	
 	public void setDenuncia(boolean denuncia) {
 		this.denuncia = denuncia;
+	}
+	
+	public void desDen(){
+		this.denuncia=false;
 	}
 	
 	public String getDescripcion() {
@@ -130,6 +142,13 @@ public class Concepto {
 		this.tageo = tags;
 	}
 	
+	public void puntuacionmas(){
+		this.puntuacion++;
+	}
+	
+	public void puntuacionmenos(){
+		this.puntuacion--;
+	}
 	public void addTageo(Tageo tageo){
 		this.tageo.add(tageo);
 	}

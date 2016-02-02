@@ -3,11 +3,9 @@
 
 
 <div class="formulariodos">
-<h1>Editado de concepto</h1>
+<h1>Editado de solución</h1>
 	<form method="post">
 	  <div class="form-group">
-	    <label for="exampleInputEmail1">Nombre</label>
-	    <input required type="text" class="form-control" value="${c.nombre}" name="nombre" id="nameElement" placeholder="Nombre del elemento">
 	  </div>
 		<div class="texto_solucion">
 		    
@@ -15,12 +13,12 @@
 				  <a href="https://en.wikibooks.org/wiki/LaTeX/Mathematics">Ejemplos de usos del lenguaje matemático</a>
 				</div>
 				
-				<h4>Descripción</h4>
+				<h4>solución de ${e:forHtml(s.user.login)}   puntuacion:${e:forHtml(s.puntuacion)}</h4>
 				
 				  <textarea class="textarea1" id="marked-mathjax-input"
 				          onkeyup="Preview.Update()"
 				          name="comment"
-				          "autofocus">${e:forHtml(c.descripcion)}
+				          "autofocus">${e:forHtml(s.contenido)}
 				   </textarea>
 				
 				  <div class="hint">Use 
@@ -43,7 +41,7 @@
 		</div>
 		
 	  
-	  <button type="submit" class="btn btn-default" value="${c.nombre}" name="enviado">Submit</button>
+	  <button type="submit" class="btn btn-default" value="${s.nombre}" name="enviadosol">Submit</button>
 	</form>
 </div>
 

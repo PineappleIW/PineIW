@@ -1,6 +1,7 @@
-
 <%@ include file="../fragments/header.jspf" %>
-
+<%@ taglib 
+   uri="https://www.owasp.org/index.php/OWASP_Java_Encoder_Project" 
+   prefix="e" %>
 <style>
 .list-group-item {
 	width: 274px;
@@ -48,16 +49,15 @@
 <div class="articulo">
 	<h2>TOP TAGS</h2>
 	<c:forEach items="${t}" var="a">
-		<div class="tags">${a}</div>
+		<div class="tags">${e:forHtml(a)}</div>
 	</c:forEach>
-	<a href="#">Ver mas</a>
 </div>
 <div class="articulo">
 	<h2>TOP USUARIOS</h2>
 	
 	<ul class=list-group>
 	<c:forEach items="${u}" var="a">
-		<div class=list-group-item>${a}</div><br />
+		<div class=list-group-item>${e:forHtml(a)}</div><br />
 	</c:forEach>
 	</ul><br />
 
@@ -67,7 +67,7 @@
 	<ul class=list-group>
 	<c:forEach items="${c}" var="a">
 		<form>
-		<button type="submit" name="conce" value="${a}">${a}</button>
+		<button type="submit" name="conce" value="${a}">${e:forHtml(a)}</button>
 		</form>
 		<br />
 	</c:forEach>

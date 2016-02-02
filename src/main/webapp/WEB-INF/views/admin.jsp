@@ -38,6 +38,7 @@
 		  <td class="admin">${a.nombre} - ${a.user.login}</td>				
 		  <td class="success"> <button type="submit" value="${a.nombre}" name="borrado">Del</button>
 		  <td class="success"> <button type="submit" value="${a.nombre}" name="editaconcep">Edit</button>
+		  <td class="success"> <button type="submit" value="${a.nombre}" name="desconcep">DesBan</button>
 		</tr>
 		</tbody>
 		</c:forEach>
@@ -65,7 +66,43 @@
 	</form>
 
 
+<div class=letra>Soluciones denunciados</div>
 
+	<form method="post">
+	<table class="table table-hover">
+		<!-- On rows -->
+		<c:forEach items="${sd}" var="a">
+		<tbody class="buscar">
+		<tr>
+		  <td class="admin">solución de ${a.user.login}   puntuacion:${a.puntuacion}</td>				
+		  <td class="success"> <button type="submit" value="${a.nombre}" name="borradosol">Del</button>
+		  <td class="success"> <button type="submit" value="${a.nombre}" name="editasol">Edit</button>
+		  <td class="success"> <button type="submit" value="${a.nombre}" name="dessol">DesBan</button>
+		</tr>
+		</tbody>
+		</c:forEach>
+	</table>
+	</form>
+
+
+
+
+<div class=letra>Soluciones</div>
+
+	<form method="post">
+	<table class="table table-hover">
+		<!-- On rows -->
+		<c:forEach items="${s}" var="a">
+		<tbody class="buscar">
+		<tr>
+		  <td class="admin">solución de ${a.user.login}   puntuacion:${a.puntuacion}</td>			
+		  <td class="success"> <button type="submit" value="${a.nombre}" name="borradosol">Del</button>
+		  <td class="success"> <button type="submit" value="${a.nombre}" name="editasol">Edit</button>
+		</tr>
+		</tbody>
+		</c:forEach>
+	</table>
+	</form>
 
 
 

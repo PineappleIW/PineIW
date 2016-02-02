@@ -2,7 +2,7 @@
 <div class="formulario">
 	<form method="post">
 	 	
-	 	<c:if test="${Contrasdif!=null}"> 
+	 	<c:if test="${e:forHtml(Contrasdif!=null)}"> 
 	  	<script type="text/javascript">
 	  	alerta();
 
@@ -10,7 +10,7 @@
 		</c:if>
 	  
 		<c:choose>
-    		<c:when test="${Nouser!=null}">
+    		<c:when test="${e:forHtml(Nouser!=null)}">
         		<div class="form-group has-warning has-feedback">
   			 	<label class="control-label" for="inputWarning2">Nombre de usuario </label>
   			 	<input type="text" class="form-control" id="inputWarning2" aria-describedby="inputWarning2Status" placeholder="Usuario necesario" name="user" >
@@ -19,10 +19,10 @@
  			 	</div> 
         	<br />
     		</c:when> 
-    		<c:when test="${Siuser!=null}">
+    		<c:when test="${e:forHtml(Siuser!=null)}">
 				<div class="form-group">
 	    		<label for="exampleInputEmail1">Nombre de usuario </label>
-	    		<input type="text" class="form-control" id="exampleInputEmail1" value="${Siuser}" name="user">
+	    		<input type="text" class="form-control" id="exampleInputEmail1" value="${e:forHtml(Siuser)}" name="user">
 	  			</div>
         	<br />
     		</c:when>    
@@ -35,7 +35,7 @@
     		</c:otherwise>
 		</c:choose>	  
 	  	<c:choose>
-    		<c:when test="${Nonomb!=null}">
+    		<c:when test="${e:forHtml(Nonomb!=null)}">
         		<div class="form-group has-warning has-feedback">
   			 	<label class="control-label" for="inputWarning2">Nombre </label>
   			 	<input type="text" class="form-control" id="inputWarning2" aria-describedby="inputWarning2Status" placeholder="Name" name="nombre">
@@ -44,10 +44,10 @@
  			 	</div> 
         	<br />
     		</c:when>
-    		<c:when test="${Sinomb!=null}">
+    		<c:when test="${e:forHtml(Sinomb!=null)}">
 				<div class="form-group">
 	    		<label for="exampleInputEmail1">Nombre </label>
-	    		<input type="text" class="form-control" id="exampleInputEmail1" value="${Sinomb}" name="nombre">
+	    		<input type="text" class="form-control" id="exampleInputEmail1" value="${e:forHtml(Sinomb)}" name="nombre">
 	  			</div>
         	<br />
     		</c:when>      
@@ -60,7 +60,7 @@
     		</c:otherwise>
 		</c:choose>
 		<c:choose>
-    		<c:when test="${Noapel!=null}">
+    		<c:when test="${e:forHtml(Noapel!=null)}">
         		<div class="form-group has-warning has-feedback">
   			 	<label class="control-label" for="inputWarning2">Apellidos </label>
   			 	<input type="text" class="form-control" id="inputWarning2" aria-describedby="inputWarning2Status" placeholder="Apellido necesario" name="apellido" >
@@ -69,10 +69,10 @@
  			 	</div> 
         	<br />
     		</c:when> 
-    		<c:when test="${Siapel!=null}">
+    		<c:when test="${e:forHtml(Siapel!=null)}">
 				<div class="form-group">
 	    		<label for="exampleInputEmail1">Apellidos </label>
-	    		<input type="text" class="form-control" id="exampleInputEmail1" value="${Siapel}" name="apellido">
+	    		<input type="text" class="form-control" id="exampleInputEmail1" value="${e:forHtml(Siapel)}" name="apellido">
 	  			</div>
         	<br />
     		</c:when>    
@@ -85,7 +85,7 @@
     		</c:otherwise>
 		</c:choose>
 		<c:choose>
-    		<c:when test="${Noemail!=null}">
+    		<c:when test="${e:forHtml(Noemail!=null)}">
         		<div class="form-group has-warning has-feedback">
   			 	<label class="control-label" for="inputWarning2">Email </label>
   			 	<input type="email" class="form-control" id="inputWarning2" aria-describedby="inputWarning2Status" placeholder="Email necesario" name="email" >
@@ -94,10 +94,10 @@
  			 	</div> 
         	<br />
     		</c:when>   
-    		<c:when test="${Siemail!=null}">
+    		<c:when test="${e:forHtml(Siemail!=null)}">
 				<div class="form-group">
 	    		<label for="exampleInputEmail1">Email </label>
-	    		<input type="text" class="form-control" id="exampleInputEmail1" value="${Siemail}" name="email">
+	    		<input type="text" class="form-control" id="exampleInputEmail1" value="${e:forHtml(Siemail)}" name="email">
 	  			</div>
         	<br />
     		</c:when>  
@@ -110,7 +110,7 @@
     		</c:otherwise>
 		</c:choose>
 		<c:choose>
-    		<c:when test="${Nocontra!=null}">
+    		<c:when test="${e:forHtml(Nocontra!=null)}">
         		<div class="form-group has-warning has-feedback">
   			 	<label class="control-label" for="inputWarning2">Contraseña </label>
   			 	<input type="password" class="form-control" id="inputWarning2" aria-describedby="inputWarning2Status" placeholder="Contraseña necesaria" name="contra" >
@@ -128,7 +128,7 @@
     		</c:otherwise>
 		</c:choose>
 		<c:choose>
-    		<c:when test="${Nocontra2!=null}">
+    		<c:when test="${e:forHtml(Nocontra2!=null)}">
         		<div class="form-group has-warning has-feedback">
   			 	<label class="control-label" for="inputWarning2">Repita contraseña </label>
   			 	<input type="password" class="form-control" id="inputWarning2" aria-describedby="inputWarning2Status" placeholder="Contraseña necesaria" name="contra2" >
@@ -147,17 +147,17 @@
 		</c:choose>
 		
 		
-	  <div class="form-group">
-	    <label for="exampleInputFile">Foto de perfil </label>
-	    <input type="file" id="exampleInputFile">
-	    <p class="help-block">Example block-level help text here.</p>
-	  </div>
-	  <div class="checkbox">
-	    <label>
-	      <input type="checkbox"> De acuerdo
-	    </label>
-	  </div>
+	 
 	  <button type="submit" class="btn btn-primary btn-lg btn-block" value="id" name="registrar">Registrar</button>
+				<c:if test="${e:forHtml(fallo!=null)}"> 
+	  	
+	  			<script >
+	  			alert("nombre de usuario no disponible");
+
+				</script>
+
+		
+				</c:if>
 	</form>
 </div>
 <%@ include file="../fragments/footer.jspf" %>
